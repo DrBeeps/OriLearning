@@ -1,0 +1,40 @@
+Reverse engineering of orientation and quaternion lib
+
+Quaternions:
+x, y, z, q or (a, b, c, d) or also ijk
+
+Euler Angles:
+yaw, pitch, roll
+
+most important class:
+EulerAngles Orientation::quaternionToEuler(Quaternion q)
+{
+    EulerAngles ret;
+
+    float sinr_cosp = 2 * (q.a * q.b + q.c * q.d);
+    float cosr_cosp = 1 - 2 * (q.b * q.b + q.c * q.c);  
+    ret.roll = atan2(sinr_cosp, cosr_cosp);
+
+    float sinp = 2 * (q.a * q.c + -q.d * q.b);
+    if (abs(sinp) >= 1)
+        ret.pitch = copysign(PI / 2, sinp); // return 90 if out of range
+    else
+        ret.pitch = asin(sinp);
+
+    float siny_cosp = 2 * (q.a * q.d + q.b * q.c);
+    float cosy_cosp = 1 - 2 * (q.c * q.c + q.d * q.d);
+    ret.yaw = atan2(siny_cosp, cosy_cosp);
+
+    return ret;
+}
+
+
+Program:
+Takes in radian data, in ypr
+puts radian data into gyroData (a EulerAngle class)
+then takes that euler angle data
+updates rocket orientation class using ori.update(gyroData, dt);
+then it is taken out of quaternion to give good output ypr databy gyroOut = ori.toEuler();
+
+
+orientation update just mutiplies every part of the quaternion by dt
