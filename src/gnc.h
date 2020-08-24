@@ -1,5 +1,8 @@
-#include "lib.h"
+#ifndef _GNC_H_
+#define _GNC_H_
 
+#include "lib.h"
+ 
 
 void servowrite()  
 {
@@ -63,7 +66,7 @@ void stabilize(EulerAngles gyroData, double dt)
 
   ori.update(gyroData, dt);
   gyroOut = ori.toEuler();
-
+ 
   PreviousGyroX = IntGyroX;
   PreviousGyroY = IntGyroY;
   PreviousGyroZ = IntGyroZ;
@@ -110,3 +113,5 @@ void stabilize(EulerAngles gyroData, double dt)
 
   pid();
 }
+
+#endif 

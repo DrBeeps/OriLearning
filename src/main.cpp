@@ -19,8 +19,9 @@
 * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-
+ 
 #include "lib.h"
+#include "gnc.h"
 
 void setup() 
 {
@@ -29,6 +30,7 @@ void setup()
   servoY.attach(36);
   lastMicros = micros();
 } 
+ 
 void loop()  
 {
   // currentMicros = micros();
@@ -37,6 +39,6 @@ void loop()
 
   // float dt = (float)(currentMicros - lastMicros) / 1000000;
   // lastMicros = currentMicros;
-
+  tvcTest();
 
 }

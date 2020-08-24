@@ -1,6 +1,6 @@
 #ifndef _LIB_H_
 #define _LIB_H_
-
+ 
 #include <Arduino.h>
 #include <Servo.h>
 
@@ -10,8 +10,7 @@
 
 #include "BMI088.h"
 #include "Orientation.h"
-#include "gnc.cpp"
-
+ 
 Servo servoX;
 Servo servoY;
 
@@ -97,12 +96,21 @@ void setupIMU()
 void tvcTest()
 {
     servoX.write(servo_homeX - 25);
-    delay(500);
-    servoX.write(servo_homeX)
-    delay(500);
+    delay(140);
+    servoX.write(servo_homeX);
+    delay(140);
     servoY.write(servo_homeY - 25);
+    delay(140);
+    servoY.write(servo_homeY);
+    delay(140);
+    servoX.write(servo_homeX + 25);
+    delay(140);
+    servoX.write(servo_homeX);
+    delay(140);
+    servoY.write(servo_homeY + 25);
+    delay(140);
+    servoY.write(servo_homeY);
     delay(500);
-    servoY.write(servo_homeY)
 }
 // ============= //
 
