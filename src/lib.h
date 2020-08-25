@@ -48,6 +48,11 @@ double DifGyroX, DifGyroY, DifGyroZ;
 double matrix1, matrix2, matrix3, matrix4, matrix5, matrix6, matrix7, matrix8, matrix9;
 double OutX, OutY;
 
+double Z_IntGyroX, Z_IntGyroY, Z_IntGyroZ, prev_IntGyroX, prev_IntGyroY, prev_IntGyroZ;
+double av_IntGyroX, av_IntGyroY, av_IntGyroZ;
+double prev_IntGyroX2, prev_IntGyroY2, prev_IntGyroZ2;
+double ZeroedX, ZeroedY, ZeroedZ, Z_T;
+
 int serialCounter = 0;
 
 uint64_t lastMicros;

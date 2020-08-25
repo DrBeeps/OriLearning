@@ -105,6 +105,9 @@ void stabilize(EulerAngles gyroData, double dt)
   OutX = OrientationX * 60;
   OutY = OrientationY * -60;
 
+  Serial.print("pOX => "); Serial.print(OutX); Serial.print("\t");
+  Serial.print("pOY => "); Serial.print(OutY); Serial.print("\n");
+  
   Ax = asin(OrientationX) * (-180 / PI);
   Ay = asin(OrientationY) * (-180 / PI);
 
@@ -112,6 +115,35 @@ void stabilize(EulerAngles gyroData, double dt)
   Serial.print("OY => "); Serial.print(Ay); Serial.print("\n");
 
   pid();
+}
+
+void trapezoidalCummulativeIntegration(EulerAngles gyroData, double dt)
+{
+
+  gyroData.pitch = -gyro.getGyroY_rads();
+  gyroData.yaw = -gyro.getGyroZ_rads();
+  gyroData.roll = gyro.getGyroX_rads();
+
+  prev_IntGyroX = gyroData.roll * RAD_TO_DEG;
+  prev_IntGyroY = gyroData.pitch * RAD_TO_DEG;
+  prev_IntGyroZ = gyroData.yaw * RAD_TO_DEG;
+
+  ori.update(gyroData, dt);
+  gyroOut = ori.toEuler();
+
+  prev_IntGyroX2 = gyroOut.roll * RAD_TO_DEG;
+  prev_IntGyroY2 = gyroOut.pitch * RAD_TO_DEG;
+  prev_IntGyroZ2 = gyroOut.yaw * RAD_TO_DEG;
+
+  av_IntGyroX = (prev_IntGyroX + prev_IntGyroX2) / 2;
+  av_IntGyroY = (prev_IntGyroY + prev_IntGyroY2) / 2;
+  av_IntGyroZ = (prev_IntGyroZ + prev_IntGyroZ2) / 2;
+
+}
+
+void zeroIMU()
+{
+
 }
 
 #endif 
