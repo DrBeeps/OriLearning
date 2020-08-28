@@ -3,6 +3,25 @@
 
 #include "lib.h"
  
+/*
+TODO:
+zero imu function
+  needs to zero just before launch for proper inertial frame
+  takes all gyro/accel readings and sets to zero
+  possible ways of doing that:
+    - soft reset of sensor:
+
+nail down ypr DCM matrix evaluation
+find out how the matrix responds to roll
+FIX THE IMU ¯\_(ツ)_/¯
+
+implemented trapezoidal cummulative integration!
+
+
+VERY IMPORTANT:
+REMEMBER TO ADD SERVO UPDATE CYCLE TO GNC AND PID 
+OUTPUT OR THE FLIGHT PERFORMANCE WILL BE SHIT
+*/
 
 void servowrite()  
 {
@@ -48,10 +67,6 @@ void pid()
   servoY.write(pwmY);
 } 
 // ================================================== //
-
-
-
-
 
 
 // ================================================== //
@@ -116,10 +131,11 @@ void stabilize(EulerAngles gyroData, double dt)
 
   pid();
 }
+// ================================================== //
+
 
 void trapezoidalCummulativeIntegration(EulerAngles gyroData, double dt)
 {
-
   gyroData.pitch = -gyro.getGyroY_rads();
   gyroData.yaw = -gyro.getGyroZ_rads();
   gyroData.roll = gyro.getGyroX_rads();
@@ -138,7 +154,6 @@ void trapezoidalCummulativeIntegration(EulerAngles gyroData, double dt)
   av_IntGyroX = (prev_IntGyroX + prev_IntGyroX2) / 2;
   av_IntGyroY = (prev_IntGyroY + prev_IntGyroY2) / 2;
   av_IntGyroZ = (prev_IntGyroZ + prev_IntGyroZ2) / 2;
-
 }
 
 void zeroIMU()

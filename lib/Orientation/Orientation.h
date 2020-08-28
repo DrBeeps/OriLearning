@@ -9,7 +9,7 @@ struct EulerAngles
     float pitch;
     float roll;
 };
-
+ 
 class Orientation
 {
 public:

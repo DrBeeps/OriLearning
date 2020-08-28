@@ -27,6 +27,11 @@ EulerAngles Orientation::quaternionToEuler(Quaternion q)
 
     return ret;
 }
+not really most important, but it basically takes the 
+qutaternion used for orientation and turns it into euler Angles
+I really don't understand why it would be that useful to use Quaternions
+other than preventing gimbal lock, which doesn't occur unless the rocket goes past 90deg
+but that probably would occur in things like the space shuttle and missiles
 
 
 Program:

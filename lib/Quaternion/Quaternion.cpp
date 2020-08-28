@@ -1,7 +1,7 @@
 #include "Quaternion.h"
 #include "Arduino.h"
 
-// http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/arithmetic/index.htm
+// http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/arithmetic/index.html
 // 800B
 Quaternion & Quaternion::operator*=(const Quaternion &q) {
     Quaternion ret;
@@ -19,7 +19,7 @@ Quaternion & Quaternion::operator+=(const Quaternion &q) {
     d += q.d;
     return *this;
 }
-
+ 
 Quaternion & Quaternion::operator*=(float scale) {
     a *= scale;
     b *= scale;

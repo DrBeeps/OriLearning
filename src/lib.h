@@ -117,6 +117,9 @@ void tvcTest()
     servoY.write(servo_homeY);
     delay(500);
 }
+// Designed an entire new TVC Mount! TVCV2 for use in Styfe, static fire happening
+// Thursday August 27th
+
 // ============= //
 
 

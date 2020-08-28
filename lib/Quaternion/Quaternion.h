@@ -31,7 +31,7 @@ public:
         return *this;
     }
 
-    // http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/arithmetic/index.htm
+    // http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/arithmetic/index.html
     Quaternion & operator*=(const Quaternion &q);
     const Quaternion operator* (const Quaternion& q) const { return Quaternion(*this) *= q; }
     Quaternion & operator+=(const Quaternion &q);
