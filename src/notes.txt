@@ -1,3 +1,6 @@
+
+
+
 Reverse engineering of orientation and quaternion lib
 
 Quaternions:
@@ -41,5 +44,5 @@ then takes that euler angle data
 updates rocket orientation class using ori.update(gyroData, dt);
 then it is taken out of quaternion to give good output ypr databy gyroOut = ori.toEuler();
 
-
 orientation update just mutiplies every part of the quaternion by dt
+

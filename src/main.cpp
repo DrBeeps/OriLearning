@@ -25,20 +25,21 @@
 
 void setup() 
 {
+  Serial.begin(9600);
   setupIMU();
   servoX.attach(37);
-  servoY.attach(36);
+  servoZ.attach(36);
   lastMicros = micros();
+  servoHome();
+  delay(2000);
 } 
  
 void loop()  
 {
-  // currentMicros = micros();
+  currentMicros = micros();
+  float dt = (float)(currentMicros - lastMicros) / 1000000;  
   
-  // stabilize(gyroData, dt);
+  stabilize(gyroData, dt);
 
-  // float dt = (float)(currentMicros - lastMicros) / 1000000;
-  // lastMicros = currentMicros;
-  tvcTest();
-
+  lastMicros = currentMicros;
 }

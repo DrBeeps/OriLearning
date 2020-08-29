@@ -2,7 +2,7 @@
 #define QUATERNION_H
 
 class Quaternion {
-public:
+public: 
     float a;
     float b; 
     float c;

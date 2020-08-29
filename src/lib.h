@@ -11,27 +11,29 @@
 #include "BMI088.h"
 #include "Orientation.h"
  
+#define pi 3.14159265358979
+
 Servo servoX;
-Servo servoY;
+Servo servoZ;
 
 Bmi088Accel accel(Wire,0x19);
 Bmi088Gyro gyro(Wire,0x69);
 
 double dt;
 
-double PIDX, PIDY;
+double PIDX, PIDZ;
 float kp, ki, kd;
 
-double p_errorX, p_errorY;
-double errorX, errorY;
+double p_errorX, p_errorZ;
+double errorX, errorZ;
 
-double Ax, Ay;
-double d_angleX, d_angleY;
+double Ax, Az;
+double d_angleX, d_angleZ;
  
-float pwmX, pwmY;
+float pwmX, pwmZ;
 
 double pidX_p, pidX_i, pidX_d;
-double pidY_p, pidY_i, pidY_d;
+double pidZ_p, pidZ_i, pidZ_d;
 
 float servo_gear_ratio = 1;
 float servo_off;
@@ -46,12 +48,15 @@ double OrientationX, OrientationY, OrientationZ;
 double DifGyroX, DifGyroY, DifGyroZ;
 
 double matrix1, matrix2, matrix3, matrix4, matrix5, matrix6, matrix7, matrix8, matrix9;
-double OutX, OutY;
+double OutX, OutZ;
 
 double Z_IntGyroX, Z_IntGyroY, Z_IntGyroZ, prev_IntGyroX, prev_IntGyroY, prev_IntGyroZ;
 double av_IntGyroX, av_IntGyroY, av_IntGyroZ;
 double prev_IntGyroX2, prev_IntGyroY2, prev_IntGyroZ2;
 double ZeroedX, ZeroedY, ZeroedZ, Z_T;
+
+double localOrientationZ, localOrientationY;
+double orientationCordY, orientationCordZ;
 
 int serialCounter = 0;
 
@@ -66,8 +71,8 @@ EulerAngles gyroOut;
 
 // =================== //
 
-int servo_homeX = 0;
-int servo_homeY = 0;
+int servo_homeX = 20;
+int servo_homeZ = 20;
 
 
 // OOP Functions //
@@ -98,29 +103,42 @@ void setupIMU()
     while(!gyro.getDrdyStatus()) {}
 }
 
+
+void servoHome()
+{
+    servoX.write(servo_homeX);
+    servoZ.write(servo_homeZ);
+}
+
+
 void tvcTest()
 {
-    servoX.write(servo_homeX - 25);
+    servoX.write(servo_homeX - 20);
     delay(140);
     servoX.write(servo_homeX);
     delay(140);
-    servoY.write(servo_homeY - 25);
+    servoZ.write(servo_homeZ - 20);
     delay(140);
-    servoY.write(servo_homeY);
+    servoZ.write(servo_homeZ);
     delay(140);
-    servoX.write(servo_homeX + 25);
+    servoX.write(servo_homeX + 20);
     delay(140);
     servoX.write(servo_homeX);
     delay(140);
-    servoY.write(servo_homeY + 25);
+    servoZ.write(servo_homeZ + 20);
     delay(140);
-    servoY.write(servo_homeY);
+    servoZ.write(servo_homeZ);
     delay(500);
 }
-// Designed an entire new TVC Mount! TVCV2 for use in Styfe, static fire happening
-// Thursday August 27th
+// Designed an entire new TVC Mount! TVCV2 for use in Styfe
 
 // ============= //
+
+double computeIntegrateX(double _GyroN, double dt)
+{
+    double ret += _GyroN * dt;
+    return ret;
+}
 
 
 #endif

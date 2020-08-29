@@ -7,7 +7,7 @@ Quaternion expectedGravity(1, 0, 0);
 EulerAngles Orientation::quaternionToEuler(Quaternion q)
 {
     EulerAngles ret;
-
+ 
     float sinr_cosp = 2 * (q.a * q.b + q.c * q.d);
     float cosr_cosp = 1 - 2 * (q.b * q.b + q.c * q.c);  
     ret.roll = atan2(sinr_cosp, cosr_cosp);
