@@ -13,7 +13,7 @@
  
 #define pi 3.14159265358979
 
-Servo servoX;
+Servo servoY;
 Servo servoZ;
 
 Bmi088Accel accel(Wire,0x19);
@@ -21,18 +21,17 @@ Bmi088Gyro gyro(Wire,0x69);
 
 double dt;
 
-double PIDX, PIDZ;
+double PIDY, PIDZ;
 float kp, ki, kd;
 
-double p_errorX, p_errorZ;
-double errorX, errorZ;
+double p_errorY, p_errorZ;
+double errorZ, errorY;
 
-double Ax, Az;
-double d_angleX, d_angleZ;
+double d_angleY, d_angleZ;
  
-float pwmX, pwmZ;
+float pwmY, pwmZ;
 
-double pidX_p, pidX_i, pidX_d;
+double pidY_p, pidY_i, pidY_d;
 double pidZ_p, pidZ_i, pidZ_d;
 
 float servo_gear_ratio = 1;
@@ -41,11 +40,14 @@ float servo_off;
 
 double PreviousGyroX, PreviousGyroY, PreviousGyroZ;
 double IntGyroX, IntGyroY, IntGyroZ;
+double IntGyroXrad, IntGyroYrad, IntGyroZrad;
 
-double OreX, OreY, OreZ;
-double OrientationX, OrientationY, OrientationZ;
+double OreZ, OreY;
+double OreX = 1;
+double OrientationX = 1;
+double OrientationY, OrientationZ;
 
-double DifGyroX, DifGyroY, DifGyroZ;
+double DifIntGyroX, DifIntGyroY, DifIntGyroZ;
 
 double matrix1, matrix2, matrix3, matrix4, matrix5, matrix6, matrix7, matrix8, matrix9;
 double OutX, OutZ;
@@ -55,9 +57,11 @@ double av_IntGyroX, av_IntGyroY, av_IntGyroZ;
 double prev_IntGyroX2, prev_IntGyroY2, prev_IntGyroZ2;
 double ZeroedX, ZeroedY, ZeroedZ, Z_T;
 
-double localOrientationZ, localOrientationY;
 double orientationCordY, orientationCordZ;
 
+double differenceOreZ, differenceOreY;
+double prev_localOrientationZ, prev_localOrientationY;
+double localOrientationZ, localOrientationY;
 int serialCounter = 0;
 
 uint64_t lastMicros;
@@ -71,8 +75,8 @@ EulerAngles gyroOut;
 
 // =================== //
 
-int servo_homeX = 20;
 int servo_homeZ = 20;
+int servo_homeY = 20;
 
 
 // OOP Functions //
@@ -106,37 +110,45 @@ void setupIMU()
 
 void servoHome()
 {
-    servoX.write(servo_homeX);
     servoZ.write(servo_homeZ);
+    servoY.write(servo_homeY);
 }
 
 
-void tvcTest()
+void servo_test()
 {
-    servoX.write(servo_homeX - 20);
-    delay(140);
-    servoX.write(servo_homeX);
-    delay(140);
-    servoZ.write(servo_homeZ - 20);
-    delay(140);
-    servoZ.write(servo_homeZ);
-    delay(140);
-    servoX.write(servo_homeX + 20);
-    delay(140);
-    servoX.write(servo_homeX);
-    delay(140);
-    servoZ.write(servo_homeZ + 20);
-    delay(140);
-    servoZ.write(servo_homeZ);
-    delay(500);
+  servoZ.write(servo_homeZ - 20);
+  delay(120);
+  servoZ.write(servo_homeZ);
+  delay(120);
+  servoY.write(servo_homeY - 20);
+  delay(120);
+  servoY.write(servo_homeY);
+  delay(120);
+  servoZ.write(servo_homeZ + 20);
+  delay(120);
+  servoZ.write(servo_homeZ);
+  delay(120);
+  servoY.write(servo_homeY + 20);
+  delay(120);
+  servoY.write(servo_homeY);
+  delay(120);
+  Serial.println("SERVO TEST COMPLETE");
+  delay(300);
 }
 // Designed an entire new TVC Mount! TVCV2 for use in Styfe
 
 // ============= //
 
-double computeIntegrateX(double _GyroN, double dt)
+double gpI;
+double gyI;
+
+// cumErrorX += errorX * elapsedTime;
+
+double integrate(float _GyroNRad, double _dt)
 {
-    double ret += _GyroN * dt;
+    float ret;
+    ret += _GyroNRad * _dt;
     return ret;
 }
 

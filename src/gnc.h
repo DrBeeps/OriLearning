@@ -25,7 +25,7 @@ OUTPUT OR THE FLIGHT PERFORMANCE WILL BE SHIT
 
 void servowrite()  
 {
- servoX.write(pwmX);
+ servoY.write(pwmY);
  servoZ.write(pwmZ); 
 }
 
@@ -41,30 +41,30 @@ void printYPR(EulerAngles out)
 
 // ================================================== //
 // ===            PID Functions | Math            === //
-void pid(double Ax, double Az, double dt)
+void pid(double localOrientationY, double localOrientationZ, double dt)
 {
-  p_errorX = errorX;
-  p_errorZ = errorZ; 
+  p_errorZ = errorZ;
+  p_errorY = errorY; 
 
-  errorX = Ax - d_angleX;
-  errorZ = Az - d_angleZ;
+  errorZ = localOrientationZ - d_angleZ;
+  errorY = localOrientationY - d_angleY;
 
-  pidX_p = kp*errorX;
-  pidZ_p = kp*errorZ; 
+  pidZ_p = kp*errorZ;
+  pidY_p = kp*errorY; 
 
-  pidX_d = kd*((errorX - p_errorX)/dt);
   pidZ_d = kd*((errorZ - p_errorZ)/dt);
+  pidY_d = kd*((errorY - p_errorY)/dt);
 
-  pidX_i = ki * (pidX_i + errorX * dt);
   pidZ_i = ki * (pidZ_i + errorZ * dt);
+  pidY_i = ki * (pidY_i + errorY * dt);
 
-  PIDX = pidX_p + pidX_i + pidX_d;
   PIDZ = pidZ_p + pidZ_i + pidZ_d;
+  PIDY = pidY_p + pidY_i + pidY_d;
 
-  pwmX = (PIDX * servo_gear_ratio); // calculate servo gear ratio ASAP
-  pwmZ = (PIDZ * servo_gear_ratio);
-  servoX.write(pwmX);
+  pwmZ = (PIDZ * servo_gear_ratio); // calculate servo gear ratio ASAP
+  pwmY = (PIDY * servo_gear_ratio);
   servoZ.write(pwmZ);
+  servoY.write(pwmY);
 } 
 // ================================================== //
 
@@ -73,88 +73,65 @@ void pid(double Ax, double Az, double dt)
 // ===    Rocket Orientation | Rotation Matrix    === //
 void stabilize(EulerAngles gyroData, double dt)
 {
-  gyro.readSensor();
-  Serial.println(gyro.getGyroX_rads());
-  Serial.println(gyro.getGyroY_rads());
-  Serial.println(gyro.getGyroZ_rads());
-  
-  gyroData.pitch = -gyro.getGyroY_rads();
-  gyroData.yaw = -gyro.getGyroZ_rads();
-  gyroData.roll = gyro.getGyroX_rads();   
+  PreviousGyroX = IntGyroXrad;
+  PreviousGyroY = IntGyroYrad;
+  PreviousGyroZ = IntGyroZrad;
 
-  ori.update(gyroData, dt);
-  gyroOut = ori.toEuler();
- 
-  PreviousGyroX = IntGyroX;
-  PreviousGyroY = IntGyroY;
-  PreviousGyroZ = IntGyroZ;
+  Serial.print("pitch rads "); Serial.print(gyroData.pitch); Serial.print("\n");
+  Serial.print("yaw rads "); Serial.print(gyroData.yaw); Serial.print("\n");
+  Serial.print("roll rads "); Serial.print(gyroData.roll); Serial.print("\n");
 
+  IntGyroX = gyroData.roll * dt;
+  IntGyroY = gyroData.pitch * dt;
+  IntGyroZ = gyroData.yaw * dt;
 
-  // angle += rate * dt
-  IntGyroY = gyroOut.yaw * RAD_TO_DEG;
-  IntGyroZ = gyroOut.pitch * RAD_TO_DEG;
-  IntGyroX = gyroOut.roll * RAD_TO_DEG;
+  Serial.print("pitch integrated (deg) "); Serial.print(IntGyroY); Serial.print("\n");
+  Serial.print("yaw integrated (deg) "); Serial.print(IntGyroZ); Serial.print("\n");
+  Serial.print("roll integrated (deg) "); Serial.print(IntGyroX); Serial.print("\n");
+
+  IntGyroXrad = IntGyroX * (pi / 180);
+  IntGyroYrad = IntGyroY * (pi / 180);
+  IntGyroZrad = IntGyroZ * (pi / 180);
+
+  Serial.print("pitch integrated (rads) "); Serial.print(IntGyroYrad); Serial.print("\n");
+  Serial.print("yaw integrated (rads) "); Serial.print(IntGyroZrad); Serial.print("\n");
+  Serial.print("roll integrated (rads) "); Serial.print(IntGyroXrad); Serial.print("\n");
+
+  DifIntGyroX = (IntGyroXrad - PreviousGyroX);
+  DifIntGyroY = (IntGyroYrad - PreviousGyroY);
+  DifIntGyroZ = (IntGyroZrad - PreviousGyroZ);
 
   OreX = OrientationX;
   OreY = OrientationY;
   OreZ = OrientationZ;
 
-  DifGyroX = (IntGyroX - PreviousGyroX);
-  DifGyroY = (IntGyroY - PreviousGyroY);
-  DifGyroZ = (IntGyroZ - PreviousGyroZ);
+  matrix1 = (cos(DifIntGyroX) * cos(DifIntGyroY));
+  matrix2 = (((sin(DifIntGyroX) * -1) * cos(DifIntGyroZ) + (cos(DifIntGyroX)) * sin(DifIntGyroY) * sin(DifIntGyroZ)));
+  matrix3 = ((sin(DifIntGyroX) * sin(DifIntGyroZ) + (cos(DifIntGyroX)) * sin(DifIntGyroY) * cos(DifIntGyroZ)));
+  matrix4 = sin(DifIntGyroX) * cos(DifIntGyroY);
+  matrix5 = ((cos(DifIntGyroX) * cos(DifIntGyroZ) + (sin(DifIntGyroX)) * sin(DifIntGyroY) * sin(DifIntGyroZ)));
+  matrix6 = (((cos(DifIntGyroX) * -1) * sin(DifIntGyroZ) + (sin(DifIntGyroX)) * sin(DifIntGyroY) * cos(DifIntGyroZ)));
+  matrix7 = (sin(DifIntGyroY)) * -1;
+  matrix8 = cos(DifIntGyroY) * sin(DifIntGyroZ);
+  matrix9 = cos(DifIntGyroY) * cos(DifIntGyroZ);
 
-  //X Matrices
-  matrix1 = (cos(DifGyroZ) * cos(DifGyroY));
-  matrix2 = (((sin(DifGyroZ) * -1) * cos(DifGyroX) + (cos(DifGyroZ)) * sin(DifGyroY) * sin(DifGyroX)));
-  matrix3 = ((sin(DifGyroZ) * sin(DifGyroX) + (cos(DifGyroZ)) * sin(DifGyroY) * cos(DifGyroX)));
-  
-  //Y Matrices
-  matrix4 = sin(DifGyroZ) * cos(DifGyroY);
-  matrix5 = ((cos(DifGyroZ) * cos(DifGyroX) + (sin(DifGyroZ)) * sin(DifGyroY) * sin(DifGyroX)));
-  matrix6 = (((cos(DifGyroZ) * -1) * sin(DifGyroX) + (sin(DifGyroZ)) * sin(DifGyroY) * cos(DifGyroX)));
-  
-  //Z Matrices
-  matrix7 = (sin(DifGyroY)) * -1;
-  matrix8 = cos(DifGyroY) * sin(DifGyroX);
-  matrix9 = cos(DifGyroY) * cos(DifGyroX);
-  
-  OrientationX = ((OreX * matrix1)) + ((OreZ * matrix2)) + ((OreZ * matrix3));
-  OrientationY = ((OreX * matrix4)) + ((OreZ * matrix5)) + ((OreZ * matrix6));
-  OrientationZ = ((OreX * matrix7)) + ((OreZ * matrix8)) + ((OreZ * matrix9));
+  OrientationZ = ((OreX * (matrix1)) + (OreY * (matrix2)) + (OreZ * (matrix3)));
+  OrientationY = ((OreX * (matrix4)) + (OreY * (matrix5)) + (OreZ * (matrix6)));
+  OrientationX = ((OreX * (matrix7)) + (OreY * (matrix8)) + (OreZ * (matrix9)));
 
-  localOrientationZ = asin(OrientationY) * (-180 / pi) - differenceOreZ;
-  localOrientationY = asin(OrientationZ) * (180 / pi) - differenceOreY;
+  prev_localOrientationY = localOrientationY;
+  prev_localOrientationZ = localOrientationZ;
 
-  Serial.print("pOZ => "); Serial.print(localOrientationZ); Serial.print("\t");
-  Serial.print("pOY => "); Serial.print(localOrientationY); Serial.print("\n");
+  localOrientationZ = asin(OrientationZ) * (180 / pi) - differenceOreZ;
+  localOrientationY = asin(OrientationX) * (180 / pi) - differenceOreY;
 
-  pid(localOrientationZ, localOrientationY, dt);
-  delay(100);
+  differenceOreY = prev_localOrientationY - localOrientationY;
+  differenceOreZ = prev_localOrientationZ - localOrientationZ;
+
+  Serial.print("localorientation Z "); Serial.print(localOrientationZ); Serial.print("\n");
+  Serial.print("localorientation Y "); Serial.print(localOrientationY); Serial.print("\n");
 }
 // ================================================== //
-
-
-void trapezoidalCummulativeIntegration(EulerAngles gyroData, double dt)
-{
-  gyroData.pitch = -gyro.getGyroY_rads();
-  gyroData.yaw = -gyro.getGyroZ_rads();
-  gyroData.roll = gyro.getGyroX_rads();
-
-  prev_IntGyroX = gyroData.roll * RAD_TO_DEG;
-  prev_IntGyroY = gyroData.pitch * RAD_TO_DEG;
-  prev_IntGyroZ = gyroData.yaw * RAD_TO_DEG;
-  // this is not correct... fix later
-  ori.update(gyroData, dt);
-  gyroOut = ori.toEuler();
-
-  prev_IntGyroX2 = gyroOut.roll * RAD_TO_DEG;
-  prev_IntGyroY2 = gyroOut.pitch * RAD_TO_DEG;
-  prev_IntGyroZ2 = gyroOut.yaw * RAD_TO_DEG;
-
-  av_IntGyroX = (prev_IntGyroX + prev_IntGyroX2) / 2;
-  av_IntGyroY = (prev_IntGyroY + prev_IntGyroY2) / 2;
-  av_IntGyroZ = (prev_IntGyroZ + prev_IntGyroZ2) / 2;
-}
 
 void zeroIMU()
 {

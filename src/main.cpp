@@ -27,8 +27,8 @@ void setup()
 {
   Serial.begin(9600);
   setupIMU();
-  servoX.attach(37);
-  servoZ.attach(36);
+  servoZ.attach(37);
+  servoY.attach(36);
   lastMicros = micros();
   servoHome();
   delay(2000);
@@ -36,10 +36,17 @@ void setup()
  
 void loop()  
 {
+  // yaw = y
+  // pitch = z
   currentMicros = micros();
-  float dt = (float)(currentMicros - lastMicros) / 1000000;  
+  double dt = (float)(currentMicros - lastMicros) / 1000000;  
+  gyro.readSensor();
+  gyroData.pitch = gyro.getGyroY_rads();
+  gyroData.yaw = gyro.getGyroZ_rads();
+  gyroData.roll = gyro.getGyroX_rads();
   
   stabilize(gyroData, dt);
 
+  delay(100);
   lastMicros = currentMicros;
 }
