@@ -46,3 +46,8 @@ then it is taken out of quaternion to give good output ypr databy gyroOut = ori.
 
 orientation update just mutiplies every part of the quaternion by dt
 
+damn it man I can't get this stupid integration/orientation to work properly and I have no idea why its really weird, why is this happening.
+so I am kind of confused how this doesn't work properly
+but there might be a few reasons:
+
+

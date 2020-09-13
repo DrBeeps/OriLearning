@@ -22,12 +22,15 @@ Bmi088Gyro gyro(Wire,0x69);
 double dt;
 
 double PIDY, PIDZ;
-float kp, ki, kd;
+float kp = 0.5;
+float ki = 0.01;
+float kd = 0.3;
 
 double p_errorY, p_errorZ;
 double errorZ, errorY;
 
-double d_angleY, d_angleZ;
+double d_angleY = 0;
+double d_angleZ = 0;
  
 float pwmY, pwmZ;
 
@@ -144,13 +147,5 @@ double gpI;
 double gyI;
 
 // cumErrorX += errorX * elapsedTime;
-
-double integrate(float _GyroNRad, double _dt)
-{
-    float ret;
-    ret += _GyroNRad * _dt;
-    return ret;
-}
-
 
 #endif

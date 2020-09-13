@@ -39,14 +39,8 @@ void loop()
   // yaw = y
   // pitch = z
   currentMicros = micros();
-  double dt = (float)(currentMicros - lastMicros) / 1000000;  
-  gyro.readSensor();
-  gyroData.pitch = gyro.getGyroY_rads();
-  gyroData.yaw = gyro.getGyroZ_rads();
-  gyroData.roll = gyro.getGyroX_rads();
-  
-  stabilize(gyroData, dt);
-
-  delay(100);
+  double dt = ((currentMicros - lastMicros) / 1000000.);  
+  intTest(dt);
   lastMicros = currentMicros;
+  delay(100);
 }
