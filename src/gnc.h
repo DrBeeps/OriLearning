@@ -23,14 +23,12 @@ REMEMBER TO ADD SERVO UPDATE CYCLE TO GNC AND PID
 OUTPUT OR THE FLIGHT PERFORMANCE WILL BE SHIT
 */
 
-void servowrite()  
-{
+void servowrite() {
  servoY.write(pwmY);
  servoZ.write(pwmZ); 
 }
 
-void printYPR(EulerAngles out)
-{
+void printYPR(EulerAngles out) {
   Serial.print(out.yaw * RAD_TO_DEG);
   Serial.print("\t");
   Serial.print(out.pitch * RAD_TO_DEG);
@@ -41,8 +39,7 @@ void printYPR(EulerAngles out)
 
 // ================================================== //
 // ===            PID Functions | Math            === //
-void pid(double IntGyroY, double IntGyroZ, double dt)
-{
+void pid(double IntGyroY, double IntGyroZ, double dt) {
   p_errorZ = errorZ;
   p_errorY = errorY; 
 
@@ -73,8 +70,7 @@ void pid(double IntGyroY, double IntGyroZ, double dt)
 // ================================================== //
 // =====    Rocket Orientation | Quaternions    ===== //
 
-void intTest(double dt)
-{
+void intTest(double dt) {
   gyro.readSensor();
 
   gyroData.roll = gyro.getGyroX_rads();

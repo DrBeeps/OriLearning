@@ -84,8 +84,7 @@ int servo_homeY = 20;
 
 // OOP Functions //
 
-void setupIMU()
-{
+void setupIMU() {
     int status;
   
     Serial.begin(115200);
@@ -94,15 +93,13 @@ void setupIMU()
 
     status = accel.begin();
 
-    if (status < 0) 
-    {
+    if (status < 0) {
         Serial.println("Accel Initialization Error");
         Serial.println(status);
         while (1) {}
     }
     status = gyro.begin();
-    if (status < 0) 
-    {
+    if (status < 0) {
         Serial.println("Gyro Initialization Error");
         Serial.println(status);
         while (1) {}
@@ -111,15 +108,13 @@ void setupIMU()
 }
 
 
-void servoHome()
-{
+void servoHome() {
     servoZ.write(servo_homeZ);
     servoY.write(servo_homeY);
 }
 
 
-void servo_test()
-{
+void servo_test() {
   servoZ.write(servo_homeZ - 20);
   delay(120);
   servoZ.write(servo_homeZ);
