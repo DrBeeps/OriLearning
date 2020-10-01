@@ -19,15 +19,24 @@ Servo servoZ;
 Bmi088Accel accel(Wire,0x19);
 Bmi088Gyro gyro(Wire,0x69);
 
+PID zAxis;
+PID yAxis;
+
 double dt;
+
+double error, errSum, compP, compI, compD, lastError, pwm;
+
+double dAngle = 0;
 
 double PIDY, PIDZ;
 float kp = 0.5;
-float ki = 0.01;
-float kd = 0.3;
+float ki = 0;
+float kd = 0.2;
 
 double p_errorY, p_errorZ;
 double errorZ, errorY;
+double errSum;
+double lastErrorZ, lastErrorY;
 
 double d_angleY = 0;
 double d_angleZ = 0;
@@ -37,35 +46,26 @@ float pwmY, pwmZ;
 double pidY_p, pidY_i, pidY_d;
 double pidZ_p, pidZ_i, pidZ_d;
 
-float servo_gear_ratio = 1;
+int SGR = 3; //  Servo Gear Ratio
 float servo_off;
 
 
-double PreviousGyroX, PreviousGyroY, PreviousGyroZ;
-double IntGyroX, IntGyroY, IntGyroZ;
-double IntGyroXrad, IntGyroYrad, IntGyroZrad;
+double LocalOrientationZ, LocalOrientationY, LocalOrientationX;
 
-double OreZ, OreY;
-double OreX = 1;
-double OrientationX = 1;
-double OrientationY, OrientationZ;
 
-double DifIntGyroX, DifIntGyroY, DifIntGyroZ;
-
-double matrix1, matrix2, matrix3, matrix4, matrix5, matrix6, matrix7, matrix8, matrix9;
-double OutX, OutZ;
-
-double Z_IntGyroX, Z_IntGyroY, Z_IntGyroZ, prev_IntGyroX, prev_IntGyroY, prev_IntGyroZ;
-double av_IntGyroX, av_IntGyroY, av_IntGyroZ;
-double prev_IntGyroX2, prev_IntGyroY2, prev_IntGyroZ2;
-double ZeroedX, ZeroedY, ZeroedZ, Z_T;
-
-double orientationCordY, orientationCordZ;
-
-double differenceOreZ, differenceOreY;
-double prev_localOrientationZ, prev_localOrientationY;
-double localOrientationZ, localOrientationY;
 int serialCounter = 0;
+
+double compPZ, compIZ, compDZ;
+double compPY, compIY, compDY;
+
+double pErrorZ, pErrorY;
+double errSumZ, errSumY;
+double InputZ, InputY;
+double lastInputZ, lastInputY;
+double dErrorZ, dErrorY;
+double dInputZ, dInputY;
+double pIntGyroZ, pIntGyroY;
+double dIntGyroZ, dIntGyroY;
 
 uint64_t lastMicros;
 uint64_t currentMicros;
@@ -81,10 +81,12 @@ EulerAngles gyroOut;
 int servo_homeZ = 20;
 int servo_homeY = 20;
 
+int negCapVal;
 
 // OOP Functions //
 
-void setupIMU() {
+void setupIMU()
+ {
     int status;
   
     Serial.begin(115200);
@@ -93,13 +95,15 @@ void setupIMU() {
 
     status = accel.begin();
 
-    if (status < 0) {
+    if (status < 0) 
+    {
         Serial.println("Accel Initialization Error");
         Serial.println(status);
         while (1) {}
     }
     status = gyro.begin();
-    if (status < 0) {
+    if (status < 0) 
+    {
         Serial.println("Gyro Initialization Error");
         Serial.println(status);
         while (1) {}
@@ -108,13 +112,15 @@ void setupIMU() {
 }
 
 
-void servoHome() {
+void servoHome() 
+{
     servoZ.write(servo_homeZ);
     servoY.write(servo_homeY);
 }
 
 
-void servo_test() {
+void servo_test() 
+{
   servoZ.write(servo_homeZ - 20);
   delay(120);
   servoZ.write(servo_homeZ);
@@ -135,6 +141,24 @@ void servo_test() {
   delay(300);
 }
 // Designed an entire new TVC Mount! TVCV2 for use in Styfe
+
+void capPwmVals(double valZ, double valY, int capVal) 
+{
+    negCapVal = -capVal;
+    if (valZ > 0 && valZ > capVal)
+    {
+        valZ = capVal;
+    } else if (valY > 0 && valY > capVal)
+    {
+        valY = capVal;
+    } else if (valZ < negCapVal)
+    {
+        valZ = -30;
+    } else if (valY < negCapVal)
+    {
+        valY = -30;
+    }
+}
 
 // ============= //
 

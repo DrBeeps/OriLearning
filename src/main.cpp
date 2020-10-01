@@ -23,7 +23,8 @@
 #include "lib.h"
 #include "gnc.h"
 
-void setup() {
+void setup()
+ {
   Serial.begin(9600);
   setupIMU();
   servoZ.attach(37);
@@ -33,12 +34,12 @@ void setup() {
   delay(2000);
 } 
  
-void loop()  {
+void loop()  
+{
   // yaw = y
   // pitch = z
   currentMicros = micros();
   double dt = ((currentMicros - lastMicros) / 1000000.);  
   intTest(dt);
   lastMicros = currentMicros;
-  delay(100);
 }
