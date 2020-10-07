@@ -40,6 +40,6 @@ void loop()
   // pitch = z
   currentMicros = micros();
   double dt = ((currentMicros - lastMicros) / 1000000.);  
-  intTest(dt);
+  stabilize(dt);
   lastMicros = currentMicros;
 }

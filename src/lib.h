@@ -1,6 +1,8 @@
 #ifndef _LIB_H_
 #define _LIB_H_
- 
+
+#include <vector>
+
 #include <Arduino.h>
 #include <Servo.h>
 
@@ -10,7 +12,7 @@
 
 #include "BMI088.h"
 #include "Orientation.h"
- 
+#include <vector>
 #define pi 3.14159265358979
 
 Servo servoY;
@@ -18,9 +20,6 @@ Servo servoZ;
 
 Bmi088Accel accel(Wire,0x19);
 Bmi088Gyro gyro(Wire,0x69);
-
-PID zAxis;
-PID yAxis;
 
 double dt;
 
@@ -35,7 +34,6 @@ float kd = 0.2;
 
 double p_errorY, p_errorZ;
 double errorZ, errorY;
-double errSum;
 double lastErrorZ, lastErrorY;
 
 double d_angleY = 0;
@@ -83,7 +81,47 @@ int servo_homeY = 20;
 
 int negCapVal;
 
+
+// =========== GNC ========= // 
+
+class PID
+{
+public:
+    double Kp = 0, Ki = 0, Kd = 0;
+    double integral = 0;
+    double setpoint = 0;
+    double input;
+
+    PID() {  }; // Default initializer
+    PID(double p, double i, double d) { Kp = p, Ki = i; Kd = d; }; // Gains initializer
+    PID(double p, double i, double d, double s) { Kp = p, Ki = i; Kd = d; setpoint = s; }; // Full initializer
+
+    double update(double input, double dt); // Updates PID maths and returns new output
+    
+private:
+    double prevError = 0;
+};
+
+double PID::update(double input, double dt)
+{
+    double error = setpoint - input;
+    integral += error * dt;
+
+    double derivative = (error - prevError) / dt;
+    prevError = error;
+    return (Kp * error) + (Ki * integral) + (Kd * derivative);
+}
+
+PID zAxis {kp, ki, kd, 0};
+PID yAxis {kp, ki, kd, 0};
+
+// ========================= //
+
+
+
 // OOP Functions //
+
+
 
 void setupIMU()
  {
