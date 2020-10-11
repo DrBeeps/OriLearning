@@ -23,18 +23,11 @@ Bmi088Gyro gyro(Wire,0x69);
 
 double dt;
 
-double error, errSum, compP, compI, compD, lastError, pwm;
-
 double dAngle = 0;
 
-double PIDY, PIDZ;
-float kp = 0.5;
-float ki = 0;
+float kp = 0.3;
+float ki = 0.055;
 float kd = 0.2;
-
-double p_errorY, p_errorZ;
-double errorZ, errorY;
-double lastErrorZ, lastErrorY;
 
 double d_angleY = 0;
 double d_angleZ = 0;
@@ -53,18 +46,6 @@ double LocalOrientationZ, LocalOrientationY, LocalOrientationX;
 
 int serialCounter = 0;
 
-double compPZ, compIZ, compDZ;
-double compPY, compIY, compDY;
-
-double pErrorZ, pErrorY;
-double errSumZ, errSumY;
-double InputZ, InputY;
-double lastInputZ, lastInputY;
-double dErrorZ, dErrorY;
-double dInputZ, dInputY;
-double pIntGyroZ, pIntGyroY;
-double dIntGyroZ, dIntGyroY;
-
 uint64_t lastMicros;
 uint64_t currentMicros;
 
@@ -76,8 +57,8 @@ EulerAngles gyroOut;
 
 // =================== //
 
-int servo_homeZ = 20;
-int servo_homeY = 20;
+int servo_homeZ = 40;
+int servo_homeY = 40;
 
 int negCapVal;
 
@@ -117,7 +98,9 @@ PID yAxis {kp, ki, kd, 0};
 
 // ========================= //
 
-
+float cs;
+float sn;
+float trueYOut, trueZOut;
 
 // OOP Functions //
 
@@ -147,6 +130,64 @@ void setupIMU()
         while (1) {}
     }
     while(!gyro.getDrdyStatus()) {}
+}
+
+double IMUValX, IMUValY, IMUValZ; // raw offset values
+double IMUOffsetX, IMUOffsetY, IMUOffsetZ; // final offset values
+int IMUSampleTime;
+
+void zeroIMURaw()
+{
+    for(IMUSampleTime = 0; IMUSampleTime < 10; IMUSampleTime++)
+    {
+        gyro.readSensor();
+
+        IMUValX += gyro.getGyroX_rads();
+        IMUValY += gyro.getGyroY_rads();
+        IMUValZ += gyro.getGyroZ_rads();
+    }
+    IMUOffsetX = IMUValX / 10;
+    IMUOffsetY = IMUValY / 10;
+    IMUOffsetZ = IMUValZ / 10;
+
+    Serial.print("Offset X"); Serial.print(IMUOffsetX); Serial.print("\t");
+    Serial.print("Offset Y"); Serial.print(IMUOffsetY); Serial.print("\t");
+    Serial.print("Offset Z"); Serial.print(IMUOffsetZ); Serial.print("\t");
+}
+
+void getOrientation(double dt)
+{
+  gyro.readSensor();
+
+  gyroData.roll = (gyro.getGyroX_rads() - abs(IMUOffsetX));
+  gyroData.pitch = (-gyro.getGyroZ_rads() - abs(IMUOffsetZ));
+  gyroData.yaw = (-gyro.getGyroY_rads() - abs(IMUOffsetY));
+
+  ori.update(gyroData, dt);
+  gyroOut = ori.toEuler();
+  
+  LocalOrientationX = (gyroOut.roll * RAD_TO_DEG);
+  LocalOrientationY = (gyroOut.pitch * RAD_TO_DEG);
+  LocalOrientationZ = (gyroOut.yaw * RAD_TO_DEG);
+}
+
+void zeroIMUDeg(double dt)
+{
+    for(IMUSampleTime = 0; IMUSampleTime < 10; IMUSampleTime++)
+    {
+        getOrientation(dt);
+
+        IMUValX += LocalOrientationX;
+        IMUValY += LocalOrientationY;
+        IMUValZ += LocalOrientationZ;
+    }
+    IMUOffsetX = IMUValX / 10;
+    IMUOffsetY = IMUValY / 10;
+    IMUOffsetZ = IMUValZ / 10;
+
+    Serial.print("Offset X"); Serial.print(IMUOffsetX); Serial.print("\t");
+    Serial.print("Offset Y"); Serial.print(IMUOffsetY); Serial.print("\t");
+    Serial.print("Offset Z"); Serial.print(IMUOffsetZ); Serial.print("\t");
 }
 
 
@@ -199,10 +240,4 @@ void capPwmVals(double valZ, double valY, int capVal)
 }
 
 // ============= //
-
-double gpI;
-double gyI;
-
-// cumErrorX += errorX * elapsedTime;
-
 #endif

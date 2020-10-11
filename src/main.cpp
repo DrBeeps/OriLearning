@@ -31,15 +31,16 @@ void setup()
   servoY.attach(36);
   lastMicros = micros();
   servoHome();
+  zeroIMUDeg(dt);
   delay(2000);
 } 
  
 void loop()  
 {
-  // yaw = y
-  // pitch = z
   currentMicros = micros();
-  double dt = ((currentMicros - lastMicros) / 1000000.);  
+  double dt = ((double)(currentMicros - lastMicros) / 1000000.);  
+  Serial.print("dt =>"); Serial.print(dt); Serial.print("\n");
+  delay(60);
   stabilize(dt);
   lastMicros = currentMicros;
 }

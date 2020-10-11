@@ -45,9 +45,9 @@ void stabilize(double dt)
 {
   gyro.readSensor();
 
-  gyroData.roll = gyro.getGyroX_rads();
-  gyroData.yaw = gyro.getGyroZ_rads();
-  gyroData.pitch = gyro.getGyroY_rads();
+  gyroData.roll = (gyro.getGyroX_rads() - IMUOffsetX);
+  gyroData.pitch = (-gyro.getGyroZ_rads() - IMUOffsetZ);
+  gyroData.yaw = (-gyro.getGyroY_rads() - IMUOffsetY);
 
   ori.update(gyroData, dt);
   gyroOut = ori.toEuler();
@@ -59,17 +59,19 @@ void stabilize(double dt)
   Serial.print("ORE Z => "); Serial.print(LocalOrientationZ); Serial.print("\n");
   Serial.print("ORE Y => "); Serial.print(LocalOrientationY); Serial.print("\n");
 
-  // Serial.print("pitch integrated (deg) "); Serial.print(IntGyroY); Serial.print("\n");
-  // Serial.print("yaw integrated (deg) "); Serial.print(IntGyroZ); Serial.print("\n");
-  // Serial.print("roll integrated (deg) "); Serial.print(IntGyroX); Serial.print("\n");
   pwmZ = zAxis.update(LocalOrientationZ, dt);
   pwmY = yAxis.update(LocalOrientationY, dt);
 
-  Serial.print("PWM Z => "); Serial.print(pwmZ); Serial.print("\n");
-  Serial.print("PWM Y => "); Serial.print(pwmY); Serial.print("\n");
+  cs = cos(-LocalOrientationX);
+  sn = sin(-LocalOrientationX);
+  trueYOut = pwmY * cs - pwmZ * sn;
+  trueZOut = pwmY * sn + pwmZ * cs;
 
-  servoZ.write(pwmZ);
-  servoY.write(pwmY);
+  Serial.print("PWM Z => "); Serial.print(trueYOut); Serial.print("\n");
+  Serial.print("PWM Y => "); Serial.print(trueZOut); Serial.print("\n");
+
+  servoZ.write(trueZOut);
+  servoY.write(trueYOut);
 }
 
 // ================================================== //
