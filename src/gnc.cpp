@@ -1,22 +1,9 @@
-#ifndef _GNC_H_
-#define _GNC_H_
-
-#include "lib.h"
+#include "includes.h"
  
 /*
 TODO:
-zero imu function
-  needs to zero just before launch for proper inertial frame
-  takes all gyro/accel readings and sets to zero
-  possible ways of doing that:
-    - soft reset of sensor:
-
-nail down ypr DCM matrix evaluation
-find out how the matrix responds to roll
-FIX THE IMU ¯\_(ツ)_/¯
-
-implemented trapezoidal cummulative integration!
-
+Fix PID odd values
+properly calibrate imu
 
 VERY IMPORTANT:
 REMEMBER TO ADD SERVO UPDATE CYCLE TO GNC AND PID 
@@ -38,6 +25,7 @@ void printYPR(EulerAngles out)
   Serial.print(out.roll * RAD_TO_DEG);
   Serial.print("\n");
 }
+
 
 // =====    Rocket Orientation | Quaternions    ===== //
 
@@ -75,13 +63,3 @@ void stabilize(double dt)
 }
 
 // ================================================== //
-
-// ==============  Physics Simulations  ============= //
-
-
-
-
-
-// ================================================== //
-
-#endif 
