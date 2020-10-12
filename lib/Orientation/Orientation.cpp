@@ -24,7 +24,7 @@ EulerAngles Orientation::quaternionToEuler(Quaternion q)
 
     return ret;
 }
-
+ 
 void Orientation::update(float yaw, float pitch, float roll, float dt)
 {
     orientation *= Quaternion::from_euler_rotation(yaw * dt, pitch * dt, roll * dt);

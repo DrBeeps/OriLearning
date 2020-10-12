@@ -12,9 +12,5 @@
 
 #include "BMI088.h"
 #include "Orientation.h"
-#include <vector>
-#include "pid.cpp"
-#include "servo.cpp"
-#include "imu.cpp"
 
 #endif
