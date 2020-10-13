@@ -112,14 +112,17 @@ void stabilize(double dt)
   pwmZ = zAxis.update(LocalOrientationZ, dt);
   pwmY = yAxis.update(LocalOrientationY, dt);
 
-  cs = cos(-LocalOrientationX);
-  sn = sin(-LocalOrientationX);
+  cs = cos(-gyroOut.roll);
+  sn = sin(-gyroOut.roll);
   
   trueZOut = pwmY * sn + pwmZ * cs;
   trueYOut = pwmY * cs - pwmZ * sn;
 
+  trueZOut = trueZOut * RAD_TO_DEG;
   trueZOut = (int)trueZOut * SGR;
   trueZOut = capVal(trueZOut, 30);
+  
+  trueYOut = trueYOut * RAD_TO_DEG;
   trueYOut = (int)trueYOut * SGR;
   trueYOut = capVal(trueYOut, 30);
 
@@ -257,6 +260,7 @@ void setup()
   servoY.attach(36);
   lastMicros = micros();
   servoHome();
+  dt = 0.01;
   zeroIMUDeg(dt);
   delay(2000);
 } 
