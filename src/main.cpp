@@ -143,13 +143,8 @@ void stabilize(double dt)
   trueZOut = pwmY * sn + pwmZ * cs;
   trueYOut = pwmY * cs - pwmZ * sn;
 
-  trueZOut = trueZOut * RAD_TO_DEG;
-  trueZOut = (int)trueZOut * SGR;
-  trueZOut = capVal(trueZOut, 30);
-  
-  trueYOut = trueYOut * RAD_TO_DEG;
-  trueYOut = (int)trueYOut * SGR;
-  trueYOut = capVal(trueYOut, 30);
+  trueZOut = constrain((int)(trueZOut * RAD_TO_DEG * SGR), -30, 30);
+  trueYOut = constrain((int)(trueYOut * RAD_TO_DEG * SGR), -30, 30);
 
   Serial.print("PWM Z => "); Serial.print(trueYOut); Serial.print("\n");
   Serial.print("PWM Y => "); Serial.print(trueZOut); Serial.print("\n");
