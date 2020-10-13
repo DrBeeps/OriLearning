@@ -50,6 +50,15 @@ double pidY_p, pidY_i, pidY_d;
 double pidZ_p, pidZ_i, pidZ_d;
 // =============== // 
 
+// === PID Module Test === //
+
+float inputAngleZ;
+float inputAngleY;
+float moduleTestOutputZ;
+float moduleTestOutputY;
+
+// ======================= //
+
 
 
 // ===== Hardware ===== //
@@ -89,6 +98,22 @@ int capVal(int val, int cap)
   {
     return val;
   }
+}
+
+void PIDModuleTest()
+{
+  Serial.println("---------- Welcome to the PID Module test ----------");
+  Serial.println("Input the Z Angle...");
+  inputAngleZ = Serial.parseFloat();
+  delay(2000);
+  Serial.println("Input the Y Angle...");
+  inputAngleY = Serial.parseFloat();
+
+  moduleTestOutputZ = zAxis.update(inputAngleZ, dt);
+  moduleTestOutputY = yAxis.update(inputAngleY, dt);
+
+  Serial.print("Output Z: "); Serial.print(moduleTestOutputZ); Serial.print("\t");
+  Serial.print("Output Y: "); Serial.print(moduleTestOutputY); Serial.print("\t");
 }
 
 void stabilize(double dt) 
@@ -270,7 +295,8 @@ void loop()
   currentMicros = micros();
   double dt = ((double)(currentMicros - lastMicros) / 1000000.);  
   Serial.print("dt =>"); Serial.print(dt); Serial.print("\n");
-  stabilize(dt);
+  PIDModuleTest();
   lastMicros = currentMicros;
+  delay(1000000000000);
 }
 // ======================================= //
