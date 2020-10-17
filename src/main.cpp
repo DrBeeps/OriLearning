@@ -74,8 +74,8 @@ Servo servoZ;
 int SGR = 3; //  Servo Gear Ratio
 float servo_off;
 float pwmY, pwmZ;
-int servo_homeZ = 40;
-int servo_homeY = 40;
+int servo_homeZ = 0;
+int servo_homeY = 0;
 // ===== // 
 
 // ==================== //
@@ -120,9 +120,9 @@ void stabilize(double dt)
 {
   gyro.readSensor();
 
-  gyroData.roll = (gyro.getGyroX_rads() - IMUOffsetX);
-  gyroData.pitch = (-gyro.getGyroZ_rads() - IMUOffsetZ);
-  gyroData.yaw = (-gyro.getGyroY_rads() - IMUOffsetY);
+  gyroData.roll = (gyro.getGyroX_rads());
+  gyroData.pitch = (-gyro.getGyroZ_rads());
+  gyroData.yaw = (-gyro.getGyroY_rads());
 
   ori.update(gyroData, dt);
   gyroOut = ori.toEuler();
@@ -130,6 +130,10 @@ void stabilize(double dt)
   LocalOrientationX = (gyroOut.roll * RAD_TO_DEG);
   LocalOrientationY = (gyroOut.pitch * RAD_TO_DEG);
   LocalOrientationZ = (gyroOut.yaw * RAD_TO_DEG);
+
+  LocalOrientationX -= IMUOffsetX;
+  LocalOrientationY -= IMUOffsetY;
+  LocalOrientationZ -= IMUOffsetZ;
 
   Serial.print("ORE Z => "); Serial.print(LocalOrientationZ); Serial.print("\n");
   Serial.print("ORE Y => "); Serial.print(LocalOrientationY); Serial.print("\n");
@@ -218,19 +222,28 @@ void getOrientation(double dt)
   LocalOrientationZ = (gyroOut.yaw * RAD_TO_DEG);
 }
 
-void zeroIMUDeg(double dt)
+void zeroIMUDeg()
 {
+  Serial.println("Zeroing IMU...");
     for(IMUSampleTime = 0; IMUSampleTime < 10; IMUSampleTime++)
     {
+        currentMicros = micros();
+        dt = ((double)(currentMicros - lastMicros) / 1000000.); 
+
         getOrientation(dt);
 
         IMUValX += LocalOrientationX;
         IMUValY += LocalOrientationY;
         IMUValZ += LocalOrientationZ;
+
+        lastMicros = currentMicros;
     }
     IMUOffsetX = IMUValX / 10;
     IMUOffsetY = IMUValY / 10;
     IMUOffsetZ = IMUValZ / 10;
+
+    Serial.println("IMU zeroing finished... calculating offsets...");
+    delay(1000);
 
     Serial.print("Offset X"); Serial.print(IMUOffsetX); Serial.print("\t");
     Serial.print("Offset Y"); Serial.print(IMUOffsetY); Serial.print("\t");
@@ -268,6 +281,13 @@ void servo_test()
   Serial.println("SERVO TEST COMPLETE");
   delay(300);
 }
+
+void roughOffsetCalc(double LocalOrientationZ, double LocalOrientationY)
+{
+  IMUOffsetZ = 0 - LocalOrientationZ;
+  IMUOffsetY = 0 - LocalOrientationY;
+}
+
 // ======================== //
 
 
@@ -280,18 +300,17 @@ void setup()
   servoY.attach(36);
   lastMicros = micros();
   servoHome();
-  dt = 0.01;
-  zeroIMUDeg(dt);
+  delay(1000);
+  zeroIMUDeg();
   delay(2000);
 } 
- 
+
 void loop()  
 {
   currentMicros = micros();
-  double dt = ((double)(currentMicros - lastMicros) / 1000000.);  
+  dt = ((double)(currentMicros - lastMicros) / 1000000.);  
   Serial.print("dt =>"); Serial.print(dt); Serial.print("\n");
-  PIDModuleTest();
+  stabilize(dt);
   lastMicros = currentMicros;
-  delay(1000000000000);
 }
 // ======================================= //
