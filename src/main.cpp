@@ -72,10 +72,10 @@ Bmi088Gyro gyro(Wire,0x69);
 Servo servoY;
 Servo servoZ;
 int SGR = 3; //  Servo Gear Ratio
-float servo_off;
+float servo_offset = 30;
 float pwmY, pwmZ;
-int servo_homeZ = 0;
-int servo_homeY = 0;
+int servo_homeZ = 90;
+int servo_homeY = 90;
 // ===== // 
 
 // ==================== //
@@ -141,20 +141,22 @@ void stabilize(double dt)
   pwmZ = zAxis.update(LocalOrientationZ, dt);
   pwmY = yAxis.update(LocalOrientationY, dt);
 
+  delay(100);
+
   cs = cos(-gyroOut.roll);
   sn = sin(-gyroOut.roll);
   
   trueZOut = pwmY * sn + pwmZ * cs;
   trueYOut = pwmY * cs - pwmZ * sn;
 
-  trueZOut = constrain((int)(trueZOut * RAD_TO_DEG * SGR), -30, 30);
-  trueYOut = constrain((int)(trueYOut * RAD_TO_DEG * SGR), -30, 30);
+  trueZOut = (constrain((int)(trueZOut * RAD_TO_DEG * SGR), -30, 30));
+  trueYOut = (constrain((int)(trueYOut * RAD_TO_DEG * SGR), -30, 30));
 
   Serial.print("PWM Z => "); Serial.print(trueYOut); Serial.print("\n");
   Serial.print("PWM Y => "); Serial.print(trueZOut); Serial.print("\n");
 
-  servoZ.write(trueZOut);
-  servoY.write(trueYOut);
+  servoZ.write(90 + trueZOut);
+  servoY.write(90 + trueYOut);
 }
 // =================================== //
 
