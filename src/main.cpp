@@ -300,7 +300,6 @@ void setup()
   setupIMU();
   servoZ.attach(37);
   servoY.attach(36);
-  lastMicros = micros();
   servoHome();
   delay(1000);
   zeroIMUDeg();
@@ -316,3 +315,5 @@ void loop()
   lastMicros = currentMicros;
 }
 // ======================================= //
+
+
